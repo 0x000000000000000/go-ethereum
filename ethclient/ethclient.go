@@ -28,6 +28,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/internal/ethapi"
 	"github.com/ethereum/go-ethereum/rpc"
 )
 
@@ -226,6 +227,16 @@ func (ec *Client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *
 		setSenderFromServer(json.tx, *json.From, *json.BlockHash)
 	}
 	return json.tx, json.BlockNumber == nil, nil
+}
+
+// TransactionByHash returns the transaction with the given hash.
+func (ec *Client) GetTransactionByHashAndPredictDoCall(ctx context.Context, hash common.Hash) (tx *ethapi.RPCTransactionPlus, err error) {
+	var json *ethapi.RPCTransactionPlus
+	err = ec.c.CallContext(ctx, &json, "eth_getTransactionByHashAndPredictDoCall", hash)
+	if err != nil {
+		return nil, err
+	}
+	return json, nil
 }
 
 // TransactionSender returns the sender address of the given transaction. The transaction

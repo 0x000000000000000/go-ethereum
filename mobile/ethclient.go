@@ -23,6 +23,7 @@ import (
 
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/ethereum/go-ethereum/internal/ethapi"
 )
 
 // EthereumClient provides access to the Ethereum APIs.
@@ -75,6 +76,13 @@ func (ec *EthereumClient) GetTransactionByHash(ctx *Context, hash *Hash) (tx *Tr
 	// TODO(karalabe): handle isPending
 	rawTx, _, err := ec.client.TransactionByHash(ctx.context, hash.hash)
 	return &Transaction{rawTx}, err
+}
+
+// GetTransactionByHash returns the transaction with the given hash.
+func (ec *EthereumClient) GetTransactionByHashAndPredictDoCall(ctx *Context, hash *Hash) (tx *ethapi.RPCTransactionPlus, _ error) {
+	// TODO(karalabe): handle isPending
+	rawTx, err := ec.client.GetTransactionByHashAndPredictDoCall(ctx.context, hash.hash)
+	return rawTx, err
 }
 
 // GetTransactionSender returns the sender address of a transaction. The transaction must
