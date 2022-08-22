@@ -17,7 +17,6 @@ import (
 
 func TransactionDoCall(ctx context.Context, b Backend, args TransactionArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride, timeout time.Duration, globalGasCap uint64) (*core.ExecutionResult, []*types.Log, error) {
 	defer func(start time.Time) { log.Debug("Executing EVM call finished", "runtime", time.Since(start)) }(time.Now())
-
 	state, header, err := b.StateAndHeaderByNumberOrHash(ctx, blockNrOrHash)
 	if state == nil || err != nil {
 		return nil, nil, err
@@ -72,8 +71,6 @@ func TransactionDoCall(ctx context.Context, b Backend, args TransactionArgs, blo
 }
 
 func (b *BlockChainAPI) PredictDoCall(ctx context.Context, tx types.Transaction, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) (hexutil.Bytes, []*types.Log, error) {
-	log.Info("tx hash:", tx.Hash().String())
-
 	chainId := b.b.ChainConfig().ChainID
 	msg, err := tx.AsMessage(types.NewLondonSigner(chainId), nil)
 	from := msg.From()
@@ -99,8 +96,6 @@ func (b *BlockChainAPI) PredictDoCall(ctx context.Context, tx types.Transaction,
 		log.Error("PredictDoCall err.....", err.Error())
 		return nil, nil, err
 	}
-
-	log.Info("PredictDoCall......")
 	// If the result contains a revert reason, try to unpack and return it.
 	if len(result.Revert()) > 0 {
 		return nil, nil, newRevertError(result)
@@ -109,8 +104,10 @@ func (b *BlockChainAPI) PredictDoCall(ctx context.Context, tx types.Transaction,
 }
 
 type RPCTransactionPlus struct {
-	Tx   *RPCTransaction `json:"tx"`
-	Logs []*types.Log    `json:"logs"`
+	Tx     *RPCTransaction `json:"tx"`
+	Logs   []*types.Log    `json:"logs"`
+	Result string          `json:"result"`
+	Revert string          `json:"revert"`
 }
 
 func (s *TransactionAPI) SetBlockChainAPI(bc *BlockChainAPI) {
@@ -147,11 +144,13 @@ func (s *TransactionAPI) GetTransactionByHashAndPredictDoCall(ctx context.Contex
 			RequireCanonical: false,
 		}
 
-		_, logs, _ := s.bc.PredictDoCall(ctx, *tx, blockorhash, nil)
+		result, logs, revertErr := s.bc.PredictDoCall(ctx, *tx, blockorhash, nil)
 		tp := newRPCPendingTransaction(tx, s.b.CurrentHeader(), s.b.ChainConfig())
 		return &RPCTransactionPlus{
-			Tx:   tp,
-			Logs: logs,
+			Tx:     tp,
+			Logs:   logs,
+			Result: result.String(),
+			Revert: revertErr.Error(),
 		}, nil
 	}
 
