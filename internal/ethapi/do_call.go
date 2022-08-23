@@ -146,12 +146,15 @@ func (s *TransactionAPI) GetTransactionByHashAndPredictDoCall(ctx context.Contex
 
 		result, logs, revertErr := s.bc.PredictDoCall(ctx, *tx, blockorhash, nil)
 		tp := newRPCPendingTransaction(tx, s.b.CurrentHeader(), s.b.ChainConfig())
-		return &RPCTransactionPlus{
+		txResult := &RPCTransactionPlus{
 			Tx:     tp,
 			Logs:   logs,
 			Result: result.String(),
-			Revert: revertErr.Error(),
-		}, nil
+		}
+		if revertErr != nil {
+			txResult.Revert = revertErr.Error()
+		}
+		return txResult, nil
 	}
 
 	// Transaction unknown, return as such
