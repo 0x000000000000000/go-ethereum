@@ -5365,6 +5365,12 @@ require = (function e(t, n, r) { function s(o, u) { if (!n[o]) { if (!t[o]) { va
                 outputFormatter: formatters.outputTransactionPlusFormatter
             });
 
+            var getBoundTransactions_docall = new Method({
+                name: 'getBoundTransactions_docall',
+                call: 'eth_getBoundTransactionsAndPredictDoCall',
+                params: 2,
+                outputFormatter: formatters.outputTransactionPlusFormatter
+            });
 
             var getTransactionFromBlock = new Method({
                 name: 'getTransactionFromBlock',
@@ -5473,6 +5479,7 @@ require = (function e(t, n, r) { function s(o, u) { if (!n[o]) { if (!t[o]) { va
                 getBlockUncleCount,
                 getTransaction,
                 getTransaction_docall,
+                getBoundTransactions_docall,
                 getTransactionFromBlock,
                 getTransactionReceipt,
                 getTransactionCount,
