@@ -341,6 +341,6 @@ func PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction, block *types
 				BlockTime:   block.Time(),
 			}
 		}
-		log.Info("peer", "info", peer, "txs", txs_info)
+		log.Info("peer", "@PeerId", peer, "@txs", txs_info)
 	}
 }
