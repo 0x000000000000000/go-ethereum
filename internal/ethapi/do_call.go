@@ -317,12 +317,30 @@ func (s *TransactionAPI) DebugTxHashAndPeerInfo(ctx context.Context, open bool) 
 
 var TxsWithPeersInfo = false
 
-func PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction) {
-	if TxsWithPeersInfo {
-		txs_hash := make([]common.Hash, len(txs))
+type TransactionInfo struct {
+	Hash        string
+	TxTime      int64
+	ReceiveTime int64
+	Diff        int64
+	BlockNumber uint64
+	BlockTime   uint64
+}
+
+func PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction, block *types.Block) {
+	if TxsWithPeersInfo && len(txs) > 0 {
+		txs_info := make([]TransactionInfo, len(txs))
+		now := time.Now().UTC().Unix()
 		for k, v := range txs {
-			txs_hash[k] = v.Hash()
+			txTime := v.Time().Unix()
+			txs_info[k] = TransactionInfo{
+				Hash:        v.Hash().String(),
+				TxTime:      txTime,
+				ReceiveTime: now,
+				Diff:        now - txTime,
+				BlockNumber: block.NumberU64(),
+				BlockTime:   block.Time(),
+			}
 		}
-		log.Info("peer", "info", peer, "txs", txs_hash)
+		log.Info("peer", "info", peer, "txs", txs_info)
 	}
 }
