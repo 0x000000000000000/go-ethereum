@@ -94,10 +94,9 @@ func (ec *EthereumClient) GetBoundTransactionsAndPredictDoCall(ctx *Context, has
 }
 
 // GetTransactionByHash returns the transaction with the given hash.
-func (ec *EthereumClient) DebugTxHashAndPeerInfo(ctx *Context, open bool) {
+func (ec *EthereumClient) DebugTxHashAndPeerInfo(ctx *Context, open bool, minDiffTime string) {
 	// TODO(karalabe): handle isPending
-	ec.client.DebugTxHashAndPeerInfo(ctx.context, open)
-
+	ec.client.DebugTxHashAndPeerInfo(ctx.context, open, minDiffTime)
 }
 
 // GetTransactionSender returns the sender address of a transaction. The transaction must

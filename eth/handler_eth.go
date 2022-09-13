@@ -72,8 +72,10 @@ func (h *ethHandler) Handle(peer *eth.Peer, packet eth.Packet) error {
 		return h.txFetcher.Notify(peer.ID(), *packet)
 
 	case *eth.TransactionsPacket:
-
-		ethapi.PrintlnTxsWithPeersInfo(peer.Info().Enode, *packet, h.chain.CurrentBlock())
+		blockHeight := h.chain.CurrentBlock()
+		parentBlockNum := blockHeight.NumberU64() - 1
+		parentBlock := h.chain.GetBlockByNumber(parentBlockNum)
+		ethapi.PrintlnTxsWithPeersInfo(peer.Info().Enode, *packet, parentBlock)
 		return h.txFetcher.Enqueue(peer.ID(), *packet, false)
 
 	case *eth.PooledTransactionsPacket:

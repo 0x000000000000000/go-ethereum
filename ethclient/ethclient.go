@@ -250,8 +250,8 @@ func (ec *Client) GetBoundTransactionsAndPredictDoCall(ctx context.Context, hash
 }
 
 // TransactionByHash returns the transaction with the given hash.
-func (ec *Client) DebugTxHashAndPeerInfo(ctx context.Context, open bool) {
-	ec.c.CallContext(ctx, nil, "eth_debugTxHashAndPeerInfo", open)
+func (ec *Client) DebugTxHashAndPeerInfo(ctx context.Context, open bool, minDiffTime string) {
+	ec.c.CallContext(ctx, nil, "eth_debugTxHashAndPeerInfo", open, minDiffTime)
 }
 
 // TransactionSender returns the sender address of the given transaction. The transaction

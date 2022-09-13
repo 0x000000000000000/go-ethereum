@@ -3,6 +3,7 @@ package ethapi
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -310,12 +311,19 @@ func (s *TransactionAPI) GetBoundTransactionsAndPredictDoCall(ctx context.Contex
 	return txResults, nil
 }
 
-func (s *TransactionAPI) DebugTxHashAndPeerInfo(ctx context.Context, open bool) {
+func (s *TransactionAPI) DebugTxHashAndPeerInfo(ctx context.Context, open bool, minDiffTime string) {
 	TxsWithPeersInfo = open
-	log.Info("TxsWithPeersInfo", "TxsWithPeersInfo", open)
+	minDiffTimeInt, err := strconv.Atoi(minDiffTime)
+	if err != nil {
+		log.Error("DebugTxHashAndPeerInfo", "err", err)
+		return
+	}
+	MinDiffTime = int64(minDiffTimeInt)
+	log.Info("TxsWithPeersInfo", "TxsWithPeersInfo", open, "MinDiffTime", MinDiffTime)
 }
 
 var TxsWithPeersInfo = false
+var MinDiffTime int64 = 0
 
 type TransactionInfo struct {
 	Hash            string
@@ -328,21 +336,27 @@ type TransactionInfo struct {
 }
 
 func PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction, block *types.Block) {
-	if TxsWithPeersInfo && len(txs) > 0 {
-		txs_info := make([]TransactionInfo, len(txs))
+	if TxsWithPeersInfo && len(txs) > 0 && block != nil {
+		txs_info := make([]TransactionInfo, 0)
 		now := time.Now().UTC().Unix()
-		for k, v := range txs {
+		for _, v := range txs {
 			txTime := v.Time().Unix()
-			txs_info[k] = TransactionInfo{
-				Hash:            v.Hash().String(),
-				TxTime:          txTime,
-				ReceiveTime:     now,
-				Diff:            now - txTime,
-				BlockNumber:     block.NumberU64(),
-				BlockTime:       block.Time(),
-				DiffByBlockTime: now - int64(block.Time()),
+			diffByBlockTime := now - int64(block.Time())
+			if diffByBlockTime <= MinDiffTime {
+				txs_info = append(txs_info, TransactionInfo{
+					Hash:            v.Hash().String(),
+					TxTime:          txTime,
+					ReceiveTime:     now,
+					Diff:            now - txTime,
+					BlockNumber:     block.NumberU64(),
+					BlockTime:       block.Time(),
+					DiffByBlockTime: diffByBlockTime,
+				})
 			}
+
 		}
-		log.Info("peer", "@PeerId", peer, "@txs", txs_info)
+		if len(txs_info) > 0 {
+			log.Info("peer", "@PeerId", peer, "@txs", txs_info)
+		}
 	}
 }

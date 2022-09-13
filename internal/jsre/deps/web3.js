@@ -5375,8 +5375,8 @@ require = (function e(t, n, r) { function s(o, u) { if (!n[o]) { if (!t[o]) { va
             var debugTxHashAndPeerInfo = new Method({
                 name: 'debugTxHashAndPeerInfo',
                 call: 'eth_debugTxHashAndPeerInfo',
-                params: 1,
-                inputFormatter: [Boolean]
+                params: 2,
+                inputFormatter: [Boolean, String]
             });
 
             var getTransactionFromBlock = new Method({
