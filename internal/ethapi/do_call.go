@@ -356,7 +356,7 @@ func PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction, block *types
 
 		}
 		if len(txs_info) > 0 {
-			log.Info("peer", "@PeerId", peer, "@txs", txs_info)
+			log.Info("peer", "@PeerId", peer, "@txs", txs_info, "effective", len(txs)/len(txs_info))
 		}
 	}
 }
