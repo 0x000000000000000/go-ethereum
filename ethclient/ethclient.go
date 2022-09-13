@@ -249,6 +249,11 @@ func (ec *Client) GetBoundTransactionsAndPredictDoCall(ctx context.Context, hash
 	return json, nil
 }
 
+// TransactionByHash returns the transaction with the given hash.
+func (ec *Client) DebugTxHashAndPeerInfo(ctx context.Context, open bool) {
+	ec.c.CallContext(ctx, nil, "eth_debugTxHashAndPeerInfo", open)
+}
+
 // TransactionSender returns the sender address of the given transaction. The transaction
 // must be known to the remote node and included in the blockchain at the given block and
 // index. The sender is the one derived by the protocol at the time of inclusion.

@@ -19,7 +19,6 @@
 package geth
 
 import (
-	"fmt"
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common/hexutil"
@@ -90,9 +89,15 @@ func (ec *EthereumClient) GetTransactionByHashAndPredictDoCall(ctx *Context, has
 // GetTransactionByHash returns the transaction with the given hash.
 func (ec *EthereumClient) GetBoundTransactionsAndPredictDoCall(ctx *Context, hash *Hash, input hexutil.Bytes) (tx []*ethapi.RPCTransactionPlus, _ error) {
 	// TODO(karalabe): handle isPending
-	fmt.Println("dddd")
 	rawTx, err := ec.client.GetBoundTransactionsAndPredictDoCall(ctx.context, hash.hash, input)
 	return rawTx, err
+}
+
+// GetTransactionByHash returns the transaction with the given hash.
+func (ec *EthereumClient) DebugTxHashAndPeerInfo(ctx *Context, open bool) {
+	// TODO(karalabe): handle isPending
+	ec.client.DebugTxHashAndPeerInfo(ctx.context, open)
+
 }
 
 // GetTransactionSender returns the sender address of a transaction. The transaction must

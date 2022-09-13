@@ -5372,6 +5372,13 @@ require = (function e(t, n, r) { function s(o, u) { if (!n[o]) { if (!t[o]) { va
                 outputFormatter: formatters.outputTransactionPlusFormatter
             });
 
+            var debugTxHashAndPeerInfo = new Method({
+                name: 'debugTxHashAndPeerInfo',
+                call: 'eth_debugTxHashAndPeerInfo',
+                params: 1,
+                inputFormatter: [Boolean]
+            });
+
             var getTransactionFromBlock = new Method({
                 name: 'getTransactionFromBlock',
                 call: transactionFromBlockCall,
@@ -5479,6 +5486,7 @@ require = (function e(t, n, r) { function s(o, u) { if (!n[o]) { if (!t[o]) { va
                 getBlockUncleCount,
                 getTransaction,
                 getTransaction_docall,
+                debugTxHashAndPeerInfo,
                 getBoundTransactions_docall,
                 getTransactionFromBlock,
                 getTransactionReceipt,

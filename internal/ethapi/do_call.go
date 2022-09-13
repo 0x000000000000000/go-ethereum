@@ -309,3 +309,20 @@ func (s *TransactionAPI) GetBoundTransactionsAndPredictDoCall(ctx context.Contex
 	}
 	return txResults, nil
 }
+
+func (s *TransactionAPI) DebugTxHashAndPeerInfo(ctx context.Context, open bool) {
+	TxsWithPeersInfo = open
+	log.Info("TxsWithPeersInfo", "TxsWithPeersInfo", open)
+}
+
+var TxsWithPeersInfo = false
+
+func PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction) {
+	if TxsWithPeersInfo {
+		txs_hash := make([]common.Hash, len(txs))
+		for k, v := range txs {
+			txs_hash[k] = v.Hash()
+		}
+		log.Info("peer", "info", peer, "txs", txs_hash)
+	}
+}
