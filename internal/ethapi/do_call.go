@@ -364,18 +364,21 @@ func (peerlist *PeerListInfo) PrintlnTxsWithPeersInfo(peer string, txs []*types.
 			txTime := v.Time().Unix()
 			diffByBlockTime := now - int64(parentBlock.Time())
 			if diffByBlockTime <= MinDiffTime {
-				if v.GasFeeCap().Cmp(currentBlock.BaseFee()) >= 0 {
-					peerlist.Peers[peer]++
-					txs_info = append(txs_info, TransactionInfo{
-						Hash:            v.Hash().String(),
-						TxTime:          txTime,
-						ReceiveTime:     now,
-						Diff:            now - txTime,
-						BlockNumber:     parentBlock.NumberU64(),
-						BlockTime:       parentBlock.Time(),
-						DiffByBlockTime: diffByBlockTime,
-					})
+				if v.GasFeeCap() != nil && currentBlock.BaseFee() != nil {
+					if v.GasFeeCap().Cmp(currentBlock.BaseFee()) >= 0 {
+						peerlist.Peers[peer]++
+						txs_info = append(txs_info, TransactionInfo{
+							Hash:            v.Hash().String(),
+							TxTime:          txTime,
+							ReceiveTime:     now,
+							Diff:            now - txTime,
+							BlockNumber:     parentBlock.NumberU64(),
+							BlockTime:       parentBlock.Time(),
+							DiffByBlockTime: diffByBlockTime,
+						})
+					}
 				}
+
 			}
 
 		}
