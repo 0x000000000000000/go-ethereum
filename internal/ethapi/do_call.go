@@ -355,8 +355,9 @@ func GetPeerListInfo() *PeerListInfo {
 	})
 	return PeerList
 }
+
 func (peerlist *PeerListInfo) PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction, parentBlock *types.Block, currentBlock *types.Block) {
-	if TxsWithPeersInfo && len(txs) > 0 && parentBlock != nil {
+	if TxsWithPeersInfo && len(txs) > 0 && parentBlock != nil && currentBlock != nil {
 		txs_info := make([]TransactionInfo, 0)
 		now := time.Now().UTC().Unix()
 		for _, v := range txs {
