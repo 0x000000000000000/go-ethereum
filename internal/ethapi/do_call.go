@@ -325,6 +325,7 @@ func (s *TransactionAPI) DebugTxHashAndPeerInfo(ctx context.Context, open bool, 
 
 func (s *TransactionAPI) GetPeerListInfo(ctx context.Context) map[string]uint64 {
 	return GetPeerListInfo().Peers
+
 }
 
 var TxsWithPeersInfo = false
@@ -342,6 +343,7 @@ type TransactionInfo struct {
 
 type PeerListInfo struct {
 	Peers map[string]uint64
+	Mux   sync.Mutex
 }
 
 var once sync.Once
@@ -351,6 +353,7 @@ func GetPeerListInfo() *PeerListInfo {
 	once.Do(func() {
 		PeerList = &PeerListInfo{
 			Peers: make(map[string]uint64),
+			Mux:   sync.Mutex{},
 		}
 	})
 	return PeerList
@@ -360,13 +363,12 @@ func (peerlist *PeerListInfo) PrintlnTxsWithPeersInfo(peer string, txs []*types.
 	if TxsWithPeersInfo && len(txs) > 0 && parentBlock != nil && currentBlock != nil {
 		txs_info := make([]TransactionInfo, 0)
 		now := time.Now().UTC().Unix()
+		diffByBlockTime := now - int64(parentBlock.Time())
 		for _, v := range txs {
 			txTime := v.Time().Unix()
-			diffByBlockTime := now - int64(parentBlock.Time())
 			if diffByBlockTime <= MinDiffTime {
 				if v.GasFeeCap() != nil && currentBlock.BaseFee() != nil {
 					if v.GasFeeCap().Cmp(currentBlock.BaseFee()) >= 0 {
-						peerlist.Peers[peer]++
 						txs_info = append(txs_info, TransactionInfo{
 							Hash:            v.Hash().String(),
 							TxTime:          txTime,
@@ -383,6 +385,9 @@ func (peerlist *PeerListInfo) PrintlnTxsWithPeersInfo(peer string, txs []*types.
 
 		}
 		if len(txs_info) > 0 {
+			peerlist.Mux.Lock()
+			peerlist.Peers[peer] = peerlist.Peers[peer] + uint64(len(txs_info))
+			peerlist.Mux.Unlock()
 			log.Info("peer", "@PeerId", peer, "@txs", txs_info, "effective", len(txs)/len(txs_info))
 		}
 	}
