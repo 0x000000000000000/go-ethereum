@@ -26,7 +26,6 @@ import (
 	"github.com/ethereum/go-ethereum/core"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/eth/protocols/eth"
-	"github.com/ethereum/go-ethereum/internal/ethapi"
 	"github.com/ethereum/go-ethereum/p2p/enode"
 )
 
@@ -75,7 +74,7 @@ func (h *ethHandler) Handle(peer *eth.Peer, packet eth.Packet) error {
 		blockHeight := h.chain.CurrentBlock()
 		parentBlockNum := blockHeight.NumberU64() - 1
 		parentBlock := h.chain.GetBlockByNumber(parentBlockNum)
-		ethapi.PrintlnTxsWithPeersInfo(peer.Info().Enode, *packet, parentBlock)
+		h.peerlist.PrintlnTxsWithPeersInfo(peer.Info().Enode, *packet, parentBlock, h.chain.CurrentBlock())
 		return h.txFetcher.Enqueue(peer.ID(), *packet, false)
 
 	case *eth.PooledTransactionsPacket:
