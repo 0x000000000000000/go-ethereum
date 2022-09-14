@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"sync"
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
@@ -322,6 +323,10 @@ func (s *TransactionAPI) DebugTxHashAndPeerInfo(ctx context.Context, open bool, 
 	log.Info("TxsWithPeersInfo", "TxsWithPeersInfo", open, "MinDiffTime", MinDiffTime)
 }
 
+func (s *TransactionAPI) GetPeerListInfo(ctx context.Context) map[string]uint64 {
+	return GetPeerListInfo().Peers
+}
+
 var TxsWithPeersInfo = false
 var MinDiffTime int64 = 0
 
@@ -335,23 +340,41 @@ type TransactionInfo struct {
 	DiffByBlockTime int64
 }
 
-func PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction, block *types.Block) {
-	if TxsWithPeersInfo && len(txs) > 0 && block != nil {
+type PeerListInfo struct {
+	Peers map[string]uint64
+}
+
+var once sync.Once
+var PeerList *PeerListInfo
+
+func GetPeerListInfo() *PeerListInfo {
+	once.Do(func() {
+		PeerList = &PeerListInfo{
+			Peers: make(map[string]uint64),
+		}
+	})
+	return PeerList
+}
+func (peerlist *PeerListInfo) PrintlnTxsWithPeersInfo(peer string, txs []*types.Transaction, parentBlock *types.Block, currentBlock *types.Block) {
+	if TxsWithPeersInfo && len(txs) > 0 && parentBlock != nil {
 		txs_info := make([]TransactionInfo, 0)
 		now := time.Now().UTC().Unix()
 		for _, v := range txs {
 			txTime := v.Time().Unix()
-			diffByBlockTime := now - int64(block.Time())
+			diffByBlockTime := now - int64(parentBlock.Time())
 			if diffByBlockTime <= MinDiffTime {
-				txs_info = append(txs_info, TransactionInfo{
-					Hash:            v.Hash().String(),
-					TxTime:          txTime,
-					ReceiveTime:     now,
-					Diff:            now - txTime,
-					BlockNumber:     block.NumberU64(),
-					BlockTime:       block.Time(),
-					DiffByBlockTime: diffByBlockTime,
-				})
+				if v.GasFeeCap().Cmp(currentBlock.BaseFee()) >= 0 {
+					peerlist.Peers[peer]++
+					txs_info = append(txs_info, TransactionInfo{
+						Hash:            v.Hash().String(),
+						TxTime:          txTime,
+						ReceiveTime:     now,
+						Diff:            now - txTime,
+						BlockNumber:     parentBlock.NumberU64(),
+						BlockTime:       parentBlock.Time(),
+						DiffByBlockTime: diffByBlockTime,
+					})
+				}
 			}
 
 		}

@@ -99,6 +99,12 @@ func (ec *EthereumClient) DebugTxHashAndPeerInfo(ctx *Context, open bool, minDif
 	ec.client.DebugTxHashAndPeerInfo(ctx.context, open, minDiffTime)
 }
 
+// GetTransactionByHash returns the transaction with the given hash.
+func (ec *EthereumClient) GetPeerListInfo(ctx *Context) map[string]uint64 {
+	// TODO(karalabe): handle isPending
+	return ec.client.GetPeerListInfo(ctx.context)
+}
+
 // GetTransactionSender returns the sender address of a transaction. The transaction must
 // be included in blockchain at the given block and index.
 func (ec *EthereumClient) GetTransactionSender(ctx *Context, tx *Transaction, blockhash *Hash, index int) (sender *Address, _ error) {

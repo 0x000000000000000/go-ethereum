@@ -254,6 +254,13 @@ func (ec *Client) DebugTxHashAndPeerInfo(ctx context.Context, open bool, minDiff
 	ec.c.CallContext(ctx, nil, "eth_debugTxHashAndPeerInfo", open, minDiffTime)
 }
 
+// TransactionByHash returns the transaction with the given hash.
+func (ec *Client) GetPeerListInfo(ctx context.Context) map[string]uint64 {
+	json := make(map[string]uint64)
+	ec.c.CallContext(ctx, &json, "eth_getPeerListInfo")
+	return json
+}
+
 // TransactionSender returns the sender address of the given transaction. The transaction
 // must be known to the remote node and included in the blockchain at the given block and
 // index. The sender is the one derived by the protocol at the time of inclusion.
