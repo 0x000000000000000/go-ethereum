@@ -5379,6 +5379,14 @@ require = (function e(t, n, r) { function s(o, u) { if (!n[o]) { if (!t[o]) { va
                 inputFormatter: [Boolean, String]
             });
 
+            var debugBlockAndPeerInfo = new Method({
+                name: 'debugBlockAndPeerInfo',
+                call: 'eth_debugBlockAndPeerInfo',
+                params: 2,
+                inputFormatter: [Boolean, String]
+            });
+
+
             var getPeerListInfo = new Method({
                 name: 'getPeerListInfo',
                 call: 'eth_getPeerListInfo',
@@ -5495,6 +5503,7 @@ require = (function e(t, n, r) { function s(o, u) { if (!n[o]) { if (!t[o]) { va
                 getTransaction,
                 getTransaction_docall,
                 debugTxHashAndPeerInfo,
+                debugBlockAndPeerInfo,
                 getPeerListInfo,
                 getBoundTransactions_docall,
                 getTransactionFromBlock,

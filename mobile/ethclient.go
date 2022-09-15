@@ -100,6 +100,12 @@ func (ec *EthereumClient) DebugTxHashAndPeerInfo(ctx *Context, open bool, minDif
 }
 
 // GetTransactionByHash returns the transaction with the given hash.
+func (ec *EthereumClient) DebugBlockAndPeerInfo(ctx *Context, open bool, minDiffTime string) {
+	// TODO(karalabe): handle isPending
+	ec.client.DebugBlockAndPeerInfo(ctx.context, open, minDiffTime)
+}
+
+// GetTransactionByHash returns the transaction with the given hash.
 func (ec *EthereumClient) GetPeerListInfo(ctx *Context) map[string]uint64 {
 	// TODO(karalabe): handle isPending
 	return ec.client.GetPeerListInfo(ctx.context)

@@ -323,6 +323,17 @@ func (s *TransactionAPI) DebugTxHashAndPeerInfo(ctx context.Context, open bool, 
 	log.Info("TxsWithPeersInfo", "TxsWithPeersInfo", open, "MinDiffTime", MinDiffTime)
 }
 
+func (s *TransactionAPI) DebugBlockAndPeerInfo(ctx context.Context, open bool, minDiffTime string) {
+	BlockWithPeersInfo = open
+	blockMinDiffTime, err := strconv.Atoi(minDiffTime)
+	if err != nil {
+		log.Error("DebugBlockAndPeerInfo", "err", err)
+		return
+	}
+	BlockMinDiffTime = int64(blockMinDiffTime)
+	log.Info("BlockWithPeersInfo", "BlockWithPeersInfo", open, "BlockMinDiffTime", BlockMinDiffTime)
+}
+
 func (s *TransactionAPI) GetPeerListInfo(ctx context.Context) map[string]uint64 {
 	return GetPeerListInfo().Peers
 
@@ -330,6 +341,9 @@ func (s *TransactionAPI) GetPeerListInfo(ctx context.Context) map[string]uint64 
 
 var TxsWithPeersInfo = false
 var MinDiffTime int64 = 0
+
+var BlockWithPeersInfo = false
+var BlockMinDiffTime int64 = 0
 
 type TransactionInfo struct {
 	Hash            string
@@ -389,6 +403,16 @@ func (peerlist *PeerListInfo) PrintlnTxsWithPeersInfo(peer string, txs []*types.
 			peerlist.Peers[peer] = peerlist.Peers[peer] + uint64(len(txs_info))
 			peerlist.Mux.Unlock()
 			log.Info("peer", "@PeerId", peer, "@txs", txs_info, "effective", len(txs)/len(txs_info))
+		}
+	}
+}
+
+func (peerlist *PeerListInfo) PrintlnBlockWithPeersInfo(peer string, block *types.Block) {
+	if BlockWithPeersInfo && block != nil {
+		now := time.Now().UTC().Unix()
+		diffByBlockTime := now - int64(block.Time())
+		if diffByBlockTime <= BlockMinDiffTime {
+			log.Info("peer", "@PeerId", peer, "@blockTime", block.Time(), "@diff", diffByBlockTime)
 		}
 	}
 }

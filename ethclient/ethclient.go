@@ -255,6 +255,11 @@ func (ec *Client) DebugTxHashAndPeerInfo(ctx context.Context, open bool, minDiff
 }
 
 // TransactionByHash returns the transaction with the given hash.
+func (ec *Client) DebugBlockAndPeerInfo(ctx context.Context, open bool, minDiffTime string) {
+	ec.c.CallContext(ctx, nil, "eth_debugBlockAndPeerInfo", open, minDiffTime)
+}
+
+// TransactionByHash returns the transaction with the given hash.
 func (ec *Client) GetPeerListInfo(ctx context.Context) map[string]uint64 {
 	json := make(map[string]uint64)
 	ec.c.CallContext(ctx, &json, "eth_getPeerListInfo")
