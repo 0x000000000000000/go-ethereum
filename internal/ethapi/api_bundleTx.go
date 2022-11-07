@@ -21,11 +21,11 @@ type BundleTxArgs struct {
 type BundleTxAccessList struct {
 	AccessList *types.AccessList `json:"accessList"`
 	GasUsed    uint64            `json:"gasUsed"`
-	VmErr      error             `json:"vmErr"`
+	VmErr      string            `json:"vmErr"`
 }
 type BundleTxAccessListResult struct {
 	AccessLists []BundleTxAccessList `json:"accessLists"`
-	Err         error                `json:"err"`
+	Err         string               `json:"err"`
 }
 
 // CreateAccessList creates a EIP-2930 type AccessList for the given transaction.
@@ -43,7 +43,7 @@ func (s *BlockChainAPI) CreateBundleTxAccessList(ctx context.Context, bundleTxAr
 		AccessLists: acl,
 	}
 	for i := 0; i < len(acl); i++ {
-		if acl[i].VmErr != nil {
+		if acl[i].VmErr != "" {
 			aclResult.Err = acl[i].VmErr
 		}
 	}
@@ -115,10 +115,14 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 			}
 			if tracer.Equal(prevTracer) {
 				//return accessList, res.UsedGas, res.Err, nil
+				vmErr := ""
+				if res.Err != nil {
+					vmErr = res.Err.Error()
+				}
 				result = append(result, BundleTxAccessList{
 					AccessList: &accessList,
 					GasUsed:    res.UsedGas,
-					VmErr:      res.Err,
+					VmErr:      vmErr,
 				})
 				break
 			}
