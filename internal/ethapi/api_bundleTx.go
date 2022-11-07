@@ -19,9 +19,9 @@ type BundleTxArgs struct {
 	Txs []TransactionArgs
 }
 type BundleTxAccessList struct {
-	AccessList types.AccessList `json:"accessList"`
-	GasUsed    uint64           `json:"gasUsed"`
-	VmErr      error            `json:"vmErr"`
+	AccessList *types.AccessList `json:"accessList"`
+	GasUsed    uint64            `json:"gasUsed"`
+	VmErr      error             `json:"vmErr"`
 }
 type BundleTxAccessListResult struct {
 	AccessLists []BundleTxAccessList `json:"accessLists"`
@@ -116,7 +116,7 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 			if tracer.Equal(prevTracer) {
 				//return accessList, res.UsedGas, res.Err, nil
 				result = append(result, BundleTxAccessList{
-					AccessList: accessList,
+					AccessList: &accessList,
 					GasUsed:    res.UsedGas,
 					VmErr:      res.Err,
 				})
