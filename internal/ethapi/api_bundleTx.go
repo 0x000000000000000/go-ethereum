@@ -60,6 +60,7 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 		return nil, err
 	}
 	result := make([]BundleTxAccessList, 0)
+	statedb := db.Copy()
 	for i := 0; i < len(bundleTxArgs.Txs); i++ {
 		args := bundleTxArgs.Txs[i]
 
@@ -94,7 +95,7 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 			log.Trace("Creating access list", "input", accessList)
 
 			// Copy the original db so we don't modify it
-			statedb := db.Copy()
+
 			// Set the accesslist to the last al
 			args.AccessList = &accessList
 			msg, err := args.ToMessage(b.RPCGasCap(), header.BaseFee)
