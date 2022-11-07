@@ -60,7 +60,7 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 		return nil, err
 	}
 	result := make([]BundleTxAccessList, 0)
-	statedb := db.Copy()
+	snapShotDb := db.Copy()
 	for i := 0; i < len(bundleTxArgs.Txs); i++ {
 		args := bundleTxArgs.Txs[i]
 
@@ -93,7 +93,7 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 			// Retrieve the current access list to expand
 			accessList := prevTracer.AccessList()
 			log.Trace("Creating access list", "input", accessList)
-
+			statedb := snapShotDb.Copy()
 			// Copy the original db so we don't modify it
 
 			// Set the accesslist to the last al
@@ -120,11 +120,13 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 				if res.Err != nil {
 					vmErr = res.Err.Error()
 				}
+
 				result = append(result, BundleTxAccessList{
 					AccessList: &accessList,
 					GasUsed:    res.UsedGas,
 					VmErr:      vmErr,
 				})
+				snapShotDb = statedb
 				break
 			}
 			prevTracer = tracer
