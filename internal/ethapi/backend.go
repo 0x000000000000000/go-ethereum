@@ -94,16 +94,19 @@ type Backend interface {
 
 func GetAPIs(apiBackend Backend) []rpc.API {
 	nonceLock := new(AddrLocker)
+	blockChainAPi := NewBlockChainAPI(apiBackend)
+	txApi := NewTransactionAPI(apiBackend, nonceLock)
+	txApi.SetBlockChainAPI(blockChainAPi)
 	return []rpc.API{
 		{
 			Namespace: "eth",
 			Service:   NewEthereumAPI(apiBackend),
 		}, {
 			Namespace: "eth",
-			Service:   NewBlockChainAPI(apiBackend),
+			Service:   blockChainAPi,
 		}, {
 			Namespace: "eth",
-			Service:   NewTransactionAPI(apiBackend, nonceLock),
+			Service:   txApi,
 		}, {
 			Namespace: "txpool",
 			Service:   NewTxPoolAPI(apiBackend),
