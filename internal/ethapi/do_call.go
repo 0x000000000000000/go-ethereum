@@ -158,7 +158,6 @@ func (b *BlockChainAPI) PredictDoCall(ctx context.Context, tx types.Transaction,
 	}
 	result, logs, err := TransactionDoCall(ctx, b.b, args, blockNrOrHash, overrides, b.b.RPCEVMTimeout(), b.b.RPCGasCap())
 	if err != nil {
-		log.Error("PredictDoCall err.....", err.Error())
 		return nil, nil, err
 	}
 	// If the result contains a revert reason, try to unpack and return it.
@@ -199,7 +198,6 @@ func (b *BlockChainAPI) TransactionsPredictDoCall(ctx context.Context, txs []*ty
 
 	result, logs, err := TransactionsDoCall(ctx, b.b, args, blockNrOrHash, overrides, b.b.RPCEVMTimeout(), b.b.RPCGasCap())
 	if err != nil {
-		log.Error("TransactionsPredictDoCall err.....", err.Error())
 		return nil, nil, []error{err}
 	}
 	returns := make([]hexutil.Bytes, 0)

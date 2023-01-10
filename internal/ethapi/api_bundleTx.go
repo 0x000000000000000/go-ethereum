@@ -110,10 +110,12 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 			if err != nil {
 				return nil, err
 			}
+
 			res, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.Gas()))
 			if err != nil {
 				return nil, fmt.Errorf("failed to apply transaction: %v err: %v", args.toTransaction().Hash(), err)
 			}
+
 			if tracer.Equal(prevTracer) {
 				//return accessList, res.UsedGas, res.Err, nil
 				vmErr := ""
@@ -133,4 +135,16 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 		}
 	}
 	return result, nil
+}
+
+type TraceCallSimulationArgs struct {
+	Args []TransactionArgs `json:"args"`
+}
+
+func (b *BlockChainAPI) GetBundleSimulation(ctx context.Context, args TraceCallSimulationArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) ([]*core.ExecutionResult, [][]*types.Log, []error) {
+	result, logs, err := TransactionsDoCall(ctx, b.b, args.Args, blockNrOrHash, overrides, b.b.RPCEVMTimeout(), b.b.RPCGasCap())
+	if err != nil {
+		return nil, nil, []error{err}
+	}
+	return result, logs, nil
 }
