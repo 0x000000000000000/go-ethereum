@@ -141,10 +141,40 @@ type TraceCallSimulationArgs struct {
 	Args []TransactionArgs `json:"args"`
 }
 
-func (b *BlockChainAPI) GetBundleSimulation(ctx context.Context, args TraceCallSimulationArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) ([]*core.ExecutionResult, [][]*types.Log, []error) {
-	result, logs, err := TransactionsDoCall(ctx, b.b, args.Args, blockNrOrHash, overrides, b.b.RPCEVMTimeout(), b.b.RPCGasCap())
+type BundleExecutionResult struct {
+	UsedGas    uint64 // Total used gas but include the refunded gas
+	Err        string // Any error encountered during the execution(listed in core/vm/errors.go)
+	ReturnData []byte // Returned data from evm(function result or data supplied with revert opcode)
+}
+type BundleSimulationResult struct {
+	Excute []*BundleExecutionResult `json:"excute"`
+}
+
+func (b *BlockChainAPI) GetBundleSimulation(ctx context.Context, args TraceCallSimulationArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) (*BundleSimulationResult, error) {
+	result, _, err := TransactionsDoCall(ctx, b.b, args.Args, blockNrOrHash, overrides, b.b.RPCEVMTimeout(), b.b.RPCGasCap())
 	if err != nil {
-		return nil, nil, []error{err}
+		return nil, err
 	}
-	return result, logs, nil
+	res := BundleSimulationResult{
+		Excute: make([]*BundleExecutionResult, 0),
+	}
+	for i := 0; i < len(result); i++ {
+		if result[i] != nil {
+			if result[i].Err != nil {
+				res.Excute = append(res.Excute, &BundleExecutionResult{
+					UsedGas:    result[i].UsedGas,
+					Err:        result[i].Err.Error(),
+					ReturnData: result[i].ReturnData,
+				})
+			} else {
+				res.Excute = append(res.Excute, &BundleExecutionResult{
+					UsedGas:    result[i].UsedGas,
+					Err:        "",
+					ReturnData: result[i].ReturnData,
+				})
+			}
+
+		}
+	}
+	return &res, nil
 }
