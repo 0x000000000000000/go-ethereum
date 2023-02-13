@@ -148,15 +148,19 @@ type BundleExecutionResult struct {
 }
 type BundleSimulationResult struct {
 	Excute []*BundleExecutionResult `json:"excute"`
+	Logs   [][]*types.Log           `json:"logs" `
 }
 
 func (b *BlockChainAPI) GetBundleSimulation(ctx context.Context, args TraceCallSimulationArgs, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) (*BundleSimulationResult, error) {
-	result, _, err := TransactionsDoCall(ctx, b.b, args.Args, blockNrOrHash, overrides, b.b.RPCEVMTimeout(), b.b.RPCGasCap())
+	result, logs, err := TransactionsDoCall(ctx, b.b, args.Args, blockNrOrHash, overrides, b.b.RPCEVMTimeout(), b.b.RPCGasCap())
 	if err != nil {
 		return nil, err
 	}
 	res := BundleSimulationResult{
 		Excute: make([]*BundleExecutionResult, 0),
+	}
+	if logs != nil {
+		res.Logs = logs
 	}
 	for i := 0; i < len(result); i++ {
 		if result[i] != nil {
