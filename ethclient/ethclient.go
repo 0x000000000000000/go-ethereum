@@ -228,6 +228,16 @@ func (ec *Client) TransactionByHash(ctx context.Context, hash common.Hash) (tx *
 	return json.tx, json.BlockNumber == nil, nil
 }
 
+// TransactionByHash returns the transaction with the given hash.
+func (ec *Client) GetBoundTransactionsAndPredictDoCall(ctx context.Context, hash common.Hash, input hexutil.Bytes) ([]*ethapi.RPCTransactionPlus, error) {
+	var json []*ethapi.RPCTransactionPlus
+	err := ec.c.CallContext(ctx, &json, "eth_getBoundTransactionsAndPredictDoCall", &hash, input)
+	if err != nil {
+		return nil, err
+	}
+	return json, nil
+}
+
 // TransactionSender returns the sender address of the given transaction. The transaction
 // must be known to the remote node and included in the blockchain at the given block and
 // index. The sender is the one derived by the protocol at the time of inclusion.

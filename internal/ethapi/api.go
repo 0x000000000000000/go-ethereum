@@ -1494,6 +1494,7 @@ type TransactionAPI struct {
 	b         Backend
 	nonceLock *AddrLocker
 	signer    types.Signer
+	bc        *BlockChainAPI
 }
 
 // NewTransactionAPI creates a new RPC service with methods for interacting with transactions.
@@ -1501,7 +1502,7 @@ func NewTransactionAPI(b Backend, nonceLock *AddrLocker) *TransactionAPI {
 	// The signer used by the API should always be the 'latest' known one because we expect
 	// signers to be backwards-compatible with old transactions.
 	signer := types.LatestSigner(b.ChainConfig())
-	return &TransactionAPI{b, nonceLock, signer}
+	return &TransactionAPI{b: b, nonceLock: nonceLock, signer: signer}
 }
 
 // GetBlockTransactionCountByNumber returns the number of transactions in the block with the given block number.
