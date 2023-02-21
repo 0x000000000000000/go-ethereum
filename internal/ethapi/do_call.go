@@ -255,7 +255,7 @@ func (s *TransactionAPI) GetTransactionByHashAndPredictDoCall(ctx context.Contex
 		}
 
 		result, logs, revertErr := s.bc.PredictDoCall(ctx, *tx, blockorhash, nil)
-		tp := newRPCPendingTransaction(tx, s.b.CurrentHeader(), s.b.ChainConfig())
+		tp := NewRPCPendingTransaction(tx, s.b.CurrentHeader(), s.b.ChainConfig())
 		txResult := &RPCTransactionPlus{
 			Tx:     tp,
 			Logs:   logs,
@@ -296,7 +296,7 @@ func (s *TransactionAPI) GetBoundTransactionsAndPredictDoCall(ctx context.Contex
 	result, logs, revertErr := s.bc.TransactionsPredictDoCall(ctx, totalTxs, blockorhash, nil)
 	txResults := make([]*RPCTransactionPlus, 0)
 	for i := 0; i < len(totalTxs); i++ {
-		tp := newRPCPendingTransaction(totalTxs[i], s.b.CurrentHeader(), s.b.ChainConfig())
+		tp := NewRPCPendingTransaction(totalTxs[i], s.b.CurrentHeader(), s.b.ChainConfig())
 		txResult := &RPCTransactionPlus{
 			Tx:     tp,
 			Logs:   logs[i],
