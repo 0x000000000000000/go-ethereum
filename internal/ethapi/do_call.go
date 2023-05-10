@@ -67,7 +67,7 @@ func TransactionDoCall(ctx context.Context, b Backend, args TransactionArgs, blo
 		return nil, nil, fmt.Errorf("execution aborted (timeout = %v)", timeout)
 	}
 	if err != nil {
-		return result, nil, fmt.Errorf("err: %w (supplied gas %d)", err, msg.Gas())
+		return result, nil, fmt.Errorf("err: %w (supplied gas %d)", err, msg.GasLimit)
 	}
 	return result, state.Logs(), nil
 }
@@ -125,7 +125,7 @@ func TransactionsDoCall(ctx context.Context, b Backend, args []TransactionArgs, 
 			return nil, nil, fmt.Errorf("execution aborted (timeout = %v)", timeout)
 		}
 		if err != nil {
-			return []*core.ExecutionResult{result}, nil, fmt.Errorf("err: %w (supplied gas %d)", err, msg.Gas())
+			return []*core.ExecutionResult{result}, nil, fmt.Errorf("err: %w (supplied gas %d)", err, msg.GasLimit)
 		}
 		results = append(results, result)
 
@@ -137,8 +137,13 @@ func TransactionsDoCall(ctx context.Context, b Backend, args []TransactionArgs, 
 
 func (b *BlockChainAPI) PredictDoCall(ctx context.Context, tx types.Transaction, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) (hexutil.Bytes, []*types.Log, error) {
 	chainId := b.b.ChainConfig().ChainID
-	msg, err := tx.AsMessage(types.NewLondonSigner(chainId), nil)
-	from := msg.From()
+	signer := types.LatestSignerForChainID(chainId)
+
+	from, err := types.Sender(signer, &tx)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	gas := hexutil.Uint64(tx.Gas())
 	gasPrice := hexutil.Big(*tx.GasPrice())
 	value := hexutil.Big(*tx.Value())
@@ -169,19 +174,19 @@ func (b *BlockChainAPI) PredictDoCall(ctx context.Context, tx types.Transaction,
 
 func (b *BlockChainAPI) TransactionsPredictDoCall(ctx context.Context, txs []*types.Transaction, blockNrOrHash rpc.BlockNumberOrHash, overrides *StateOverride) ([]hexutil.Bytes, [][]*types.Log, []error) {
 	args := make([]TransactionArgs, 0)
+	chainId := b.b.ChainConfig().ChainID
+	signer := types.LatestSignerForChainID(chainId)
+	hexChainId := hexutil.Big(*chainId)
 	for _, v := range txs {
-		chainId := b.b.ChainConfig().ChainID
-		msg, err := v.AsMessage(types.NewLondonSigner(chainId), nil)
+		from, err := types.Sender(signer, v)
 		if err != nil {
 			return nil, nil, []error{err}
 		}
-		from := msg.From()
 		gas := hexutil.Uint64(v.Gas())
 		gasPrice := hexutil.Big(*v.GasPrice())
 		value := hexutil.Big(*v.Value())
 		nonce := hexutil.Uint64(v.Nonce())
 		data := hexutil.Bytes(v.Data())
-		hexChainId := hexutil.Big(*chainId)
 		Txargs := TransactionArgs{
 			From:     &from,
 			To:       v.To(),
@@ -246,7 +251,7 @@ func (s *TransactionAPI) GetTransactionByHashAndPredictDoCall(ctx context.Contex
 	if tx := s.b.GetPoolTransaction(hash); tx != nil {
 		block := s.b.CurrentBlock()
 
-		blockNum := rpc.BlockNumber(block.Number().Int64())
+		blockNum := rpc.BlockNumber(block.Number.Int64())
 		blackHash := block.Hash()
 		blockorhash := rpc.BlockNumberOrHash{
 			BlockNumber:      &blockNum,
@@ -278,7 +283,7 @@ func (s *TransactionAPI) GetBoundTransactionsAndPredictDoCall(ctx context.Contex
 	}
 
 	block := s.b.CurrentBlock()
-	blockNum := rpc.BlockNumber(block.Number().Int64())
+	blockNum := rpc.BlockNumber(block.Number.Int64())
 	blackHash := block.Hash()
 	blockorhash := rpc.BlockNumberOrHash{
 		BlockNumber:      &blockNum,

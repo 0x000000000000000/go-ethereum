@@ -29,6 +29,7 @@ import (
 	"github.com/ethereum/go-ethereum/consensus/clique"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
+	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-ethereum/signer/core/apitypes"
 )
@@ -84,6 +85,8 @@ func (api *SignerAPI) SignData(ctx context.Context, contentType string, addr com
 		api.UI.ShowError(err.Error())
 		return nil, err
 	}
+	recoverAddr, err := crypto.Ecrecover(signature, crypto.Keccak256(req.Rawdata))
+	log.Info("Ecrecover", "err", err, "recoverAddr", common.Bytes2Hex(recoverAddr))
 	return signature, nil
 }
 
@@ -94,6 +97,7 @@ func (api *SignerAPI) SignData(ctx context.Context, contentType string, addr com
 // As it is now, we accept any charset and just treat it as 'raw'.
 // This method returns the mimetype for signing along with the request
 func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType string, addr common.MixedcaseAddress, data interface{}) (*SignDataRequest, bool, error) {
+
 	var (
 		req          *SignDataRequest
 		useEthereumV = true // Default to use V = 27 or 28, the legacy Ethereum format
@@ -102,7 +106,7 @@ func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType 
 	if err != nil {
 		return nil, useEthereumV, err
 	}
-
+	log.Info("determineSignatureFormat", "contentType", contentType, "addr", addr, "data", data, "mediaType", mediaType)
 	switch mediaType {
 	case apitypes.IntendedValidator.Mime:
 		// Data with an intended validator
@@ -179,7 +183,8 @@ func (api *SignerAPI) determineSignatureFormat(ctx context.Context, contentType 
 		if err != nil {
 			return nil, useEthereumV, err
 		}
-		sighash, msg := accounts.TextAndHash(textData)
+		// sighash, msg := accounts.TextAndHash(textData)
+		sighash, msg := accounts.TextAndHash2(textData)
 		messages := []*apitypes.NameValueType{
 			{
 				Name:  "message",

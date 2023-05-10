@@ -116,7 +116,7 @@ func (api *API) TraceCallSimulation(ctx context.Context, args TraceCallSimulatio
 		vmenv := vm.NewEVM(vmctx, txContext, statedb, api.backend.ChainConfig(), vm.Config{Debug: true, Tracer: tracer, NoBaseFee: true})
 		// Call Prepare to clear out the statedb access list
 		statedb.SetTxContext(txctx.TxHash, txctx.TxIndex)
-		if _, err = core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.Gas())); err != nil {
+		if _, err = core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit)); err != nil {
 			return nil, fmt.Errorf("tracing failed: %w", err)
 		}
 		snapShotDb = statedb

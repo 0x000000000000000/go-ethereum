@@ -25,6 +25,7 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/event"
+	"github.com/ethereum/go-ethereum/log"
 	"golang.org/x/crypto/sha3"
 )
 
@@ -199,6 +200,14 @@ func TextAndHash(data []byte) ([]byte, string) {
 	hasher := sha3.NewLegacyKeccak256()
 	hasher.Write([]byte(msg))
 	return hasher.Sum(nil), msg
+}
+
+func TextAndHash2(data []byte) ([]byte, string) {
+	log.Info("TextAndHash2", "data", common.Bytes2Hex(data))
+	// msg := fmt.Sprintf("\x19Ethereum Signed Message:\n%d%s", len(data), string(data))
+	hasher := sha3.NewLegacyKeccak256()
+	hasher.Write(data)
+	return hasher.Sum(nil), string(data)
 }
 
 // WalletEventType represents the different event types that can be fired by

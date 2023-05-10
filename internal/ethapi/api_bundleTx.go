@@ -111,7 +111,7 @@ func GetBundleTxAccessList(ctx context.Context, b Backend, blockNrOrHash rpc.Blo
 				return nil, err
 			}
 
-			res, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.Gas()))
+			res, err := core.ApplyMessage(vmenv, msg, new(core.GasPool).AddGas(msg.GasLimit))
 			if err != nil {
 				return nil, fmt.Errorf("failed to apply transaction: %v err: %v", args.toTransaction().Hash(), err)
 			}
