@@ -85,8 +85,12 @@ func (api *SignerAPI) SignData(ctx context.Context, contentType string, addr com
 		api.UI.ShowError(err.Error())
 		return nil, err
 	}
-	recoverAddr, err := crypto.Ecrecover(signature, crypto.Keccak256(req.Rawdata))
-	log.Info("Ecrecover", "err", err, "recoverAddr", common.Bytes2Hex(recoverAddr))
+	if v, ok := data.(string); ok {
+		legacyData := common.Hex2Bytes(v)
+		recoverAddr, err := crypto.Ecrecover(signature, crypto.Keccak256(req.Rawdata))
+		log.Info("Ecrecover", "err", err, "recoverAddr", common.Bytes2Hex(recoverAddr), "legacyData", legacyData, "Rawdata", req.Rawdata)
+	}
+
 	return signature, nil
 }
 
