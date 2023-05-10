@@ -99,11 +99,15 @@ func (api *SignerAPI) SignData(ctx context.Context, contentType string, addr com
 			newSign[64] = 0x01
 		}
 		publiKey, err := crypto.SigToPub(crypto.Keccak256(req.Rawdata), newSign[:])
-		if err == nil {
+		if err == nil && publiKey != nil {
 			addr := crypto.PubkeyToAddress(*publiKey)
 			log.Info("addr", "addr", addr)
 		}
-
+		publiKey, err = crypto.SigToPub(crypto.Keccak256(req.Rawdata), signature)
+		if err == nil && publiKey != nil {
+			addr := crypto.PubkeyToAddress(*publiKey)
+			log.Info("addr2", "addr2", addr)
+		}
 		log.Info("Ecrecover", "err", err, "legacyData", v, "Rawdata", req.Rawdata, "signature", common.Bytes2Hex(signature), "newSign", common.Bytes2Hex(newSign[:]))
 	}
 
